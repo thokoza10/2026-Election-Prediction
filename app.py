@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+import html
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestRegressor
@@ -25,13 +26,16 @@ st.set_page_config(
 # ============================================================
 # CUSTOM DESIGN
 # ============================================================
+# NOTE: raw HTML passed to st.markdown is still parsed by the
+# Markdown engine. Any line indented 4+ spaces becomes a code
+# block, and a blank line ends a raw-HTML block. All HTML below
+# is therefore flush-left with no blank lines inside the tags.
 
-st.markdown("""
-<style>
-
+st.markdown(
+    """<style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-html, body, [class*="css"] {
+html, body {
     font-family: 'Inter', sans-serif;
 }
 
@@ -54,15 +58,17 @@ section[data-testid="stSidebar"] {
     border-right: 1px solid #1f2937;
 }
 
-section[data-testid="stSidebar"] * {
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] {
     color: #e5e7eb;
 }
 
 .hero {
     padding: 2.5rem;
     border-radius: 24px;
-    background:
-        linear-gradient(135deg, rgba(15,23,42,0.96), rgba(17,24,39,0.92));
+    background: linear-gradient(135deg, rgba(15,23,42,0.96), rgba(17,24,39,0.92));
     border: 1px solid #273449;
     margin-bottom: 1.5rem;
     position: relative;
@@ -78,6 +84,13 @@ section[data-testid="stSidebar"] * {
     top: -120px;
     border-radius: 50%;
     background: rgba(37,99,235,0.12);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.hero > * {
+    position: relative;
+    z-index: 1;
 }
 
 .hero-title {
@@ -193,14 +206,11 @@ section[data-testid="stSidebar"] * {
 div[data-testid="stDataFrame"] {
     border: 1px solid #253247;
     border-radius: 12px;
+    overflow: hidden;
 }
-
-button[kind="primary"] {
-    border-radius: 10px;
-}
-
-</style>
-""", unsafe_allow_html=True)
+</style>""",
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
@@ -1123,22 +1133,12 @@ ward_analysis = (
 # ============================================================
 
 st.sidebar.markdown(
-    """
-    <div style="
-        font-size:1.35rem;
-        font-weight:800;
-        margin-bottom:0.2rem;
-    ">
-        📊 ETH INTELLIGENCE
-    </div>
-    <div style="
-        color:#64748b;
-        font-size:0.78rem;
-        margin-bottom:1.5rem;
-    ">
-        Election Analytics Platform
-    </div>
-    """,
+    """<div style="font-size:1.35rem; font-weight:800; margin-bottom:0.2rem;">
+📊 ETH INTELLIGENCE
+</div>
+<div style="color:#64748b; font-size:0.78rem; margin-bottom:1.5rem;">
+Election Analytics Platform
+</div>""",
     unsafe_allow_html=True
 )
 
@@ -1159,22 +1159,22 @@ st.sidebar.markdown("---")
 
 st.sidebar.markdown(
     f"""
-    **Municipality**
+**Municipality**
 
-    ETH - eThekwini
+ETH - eThekwini
 
-    **Comparable wards**
+**Comparable wards**
 
-    {len(common_wards)}
+{len(common_wards)}
 
-    **Model**
+**Model**
 
-    Random Forest Regressor
+Random Forest Regressor
 
-    **Evaluation**
+**Evaluation**
 
-    {test_r2 * 100:.2f}% R²
-    """
+{test_r2 * 100:.2f}% R²
+"""
 )
 
 st.sidebar.markdown("---")
@@ -1189,26 +1189,17 @@ st.sidebar.caption(
 # ============================================================
 
 st.markdown(
-    """
-    <div class="hero">
-
-        <div class="badge">
-            DATA SCIENCE • MACHINE LEARNING • FORECASTING
-        </div>
-
-        <div class="hero-title">
-            eThekwini Election Intelligence
-        </div>
-
-        <div class="hero-subtitle">
-            An interactive analytical platform examining historical
-            election behaviour in eThekwini Metropolitan Municipality
-            and presenting model-generated 2026 projections from
-            historical voting and participation patterns.
-        </div>
-
-    </div>
-    """,
+    """<div class="hero">
+<div class="badge">
+DATA SCIENCE • MACHINE LEARNING • FORECASTING
+</div>
+<div class="hero-title">
+eThekwini Election Intelligence
+</div>
+<div class="hero-subtitle">
+An interactive analytical platform examining historical election behaviour in eThekwini Metropolitan Municipality and presenting model-generated 2026 projections from historical voting and participation patterns.
+</div>
+</div>""",
     unsafe_allow_html=True
 )
 
@@ -1268,21 +1259,11 @@ if page == "Overview":
         with col:
 
             st.markdown(
-                f"""
-                <div class="metric-card">
-                    <div class="metric-label">
-                        {item[0]}
-                    </div>
-
-                    <div class="metric-value">
-                        {item[1]}
-                    </div>
-
-                    <div class="metric-description">
-                        {item[2]}
-                    </div>
-                </div>
-                """,
+                f"""<div class="metric-card">
+<div class="metric-label">{html.escape(str(item[0]))}</div>
+<div class="metric-value">{html.escape(str(item[1]))}</div>
+<div class="metric-description">{html.escape(str(item[2]))}</div>
+</div>""",
                 unsafe_allow_html=True
             )
 
@@ -1332,16 +1313,10 @@ if page == "Overview":
     )
 
     st.markdown(
-        """
-        <div class="info-box">
-        <strong>Interpretation</strong><br><br>
-        The chart above presents the model's projected 2026
-        party-share distribution. These values are model-generated
-        estimates based on the historical data and assumptions used
-        in this project. They should not be interpreted as actual
-        election results.
-        </div>
-        """,
+        """<div class="info-box">
+<strong>Interpretation</strong><br><br>
+The chart above presents the model's projected 2026 party-share distribution. These values are model-generated estimates based on the historical data and assumptions used in this project. They should not be interpreted as actual election results.
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -1484,19 +1459,11 @@ elif page == "2026 Forecast":
     with col2:
 
         st.markdown(
-            f"""
-            <div class="success-box">
-            <strong>{selected_party}</strong><br>
-            Projected share:
-            <strong>
-            {selected_row["ProjectedShare_2026"]:.2f}%
-            </strong><br>
-            Projected votes:
-            <strong>
-            {selected_row["ProjectedVotes_2026"]:,.0f}
-            </strong>
-            </div>
-            """,
+            f"""<div class="success-box">
+<strong>{html.escape(str(selected_party))}</strong><br>
+Projected share: <strong>{selected_row["ProjectedShare_2026"]:.2f}%</strong><br>
+Projected votes: <strong>{selected_row["ProjectedVotes_2026"]:,.0f}</strong>
+</div>""",
             unsafe_allow_html=True
         )
 
@@ -1740,15 +1707,10 @@ elif page == "Turnout":
     )
 
     st.markdown(
-        """
-        <div class="warning-box">
-        <strong>Important methodological note</strong><br><br>
-        The participation measure used here is a PR-ballot participation
-        proxy calculated from valid votes plus spoilt votes divided by
-        registered voters. It should not automatically be interpreted
-        as total participation across every municipal ballot type.
-        </div>
-        """,
+        """<div class="warning-box">
+<strong>Important methodological note</strong><br><br>
+The participation measure used here is a PR-ballot participation proxy calculated from valid votes plus spoilt votes divided by registered voters. It should not automatically be interpreted as total participation across every municipal ballot type.
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -1825,24 +1787,13 @@ elif page == "Turnout":
     )
 
     st.markdown(
-        f"""
-        <div class="metric-card">
-
-            <div class="metric-label">
-                ESTIMATED PARTICIPATING VOTERS
-            </div>
-
-            <div class="metric-value">
-                {estimated_voters_2026:,.0f}
-            </div>
-
-            <div class="metric-description">
-                Derived from the 2021 registered-voter base and
-                the projected 2026 PR participation rate.
-            </div>
-
-        </div>
-        """,
+        f"""<div class="metric-card">
+<div class="metric-label">ESTIMATED PARTICIPATING VOTERS</div>
+<div class="metric-value">{estimated_voters_2026:,.0f}</div>
+<div class="metric-description">
+Derived from the 2021 registered-voter base and the projected 2026 PR participation rate.
+</div>
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -1919,13 +1870,10 @@ elif page == "Model Performance":
         )
 
     st.markdown(
-        '<div class="success-box">'
-        '<strong>Model evaluation</strong><br><br>'
-        f'The model achieved a test-set R² of '
-        f'<strong>{test_r2 * 100:.2f}%</strong>. '
-        'For this regression target, R², MAE and RMSE are used '
-        'as the primary evaluation measures.'
-        '</div>',
+        f"""<div class="success-box">
+<strong>Model evaluation</strong><br><br>
+The model achieved a test-set R² of <strong>{test_r2 * 100:.2f}%</strong>. For this regression target, R², MAE and RMSE are used as the primary evaluation measures.
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -2028,15 +1976,10 @@ elif page == "Data & Methodology":
     )
 
     st.markdown(
-        """
-        <div class="info-box">
-        <strong>Historical data</strong><br><br>
-        Two election datasets were used: 2016 and 2021 eThekwini
-        election records. Each dataset contains PR and Ward ballot
-        records together with voting districts, voting stations,
-        registered voters, spoilt votes, party names and valid votes.
-        </div>
-        """,
+        """<div class="info-box">
+<strong>Historical data</strong><br><br>
+Two election datasets were used: 2016 and 2021 eThekwini election records. Each dataset contains PR and Ward ballot records together with voting districts, voting stations, registered voters, spoilt votes, party names and valid votes.
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -2089,15 +2032,10 @@ elif page == "Data & Methodology":
     )
 
     st.markdown(
-        """
-        <div class="warning-box">
-        <strong>2016 source-data inconsistency</strong><br><br>
-        One 2016 station contained valid party votes greater than its
-        registered-voter count. The record was retained rather than
-        silently deleted because it represents a source-data issue that
-        should be documented and investigated rather than hidden.
-        </div>
-        """,
+        """<div class="warning-box">
+<strong>2016 source-data inconsistency</strong><br><br>
+One 2016 station contained valid party votes greater than its registered-voter count. The record was retained rather than silently deleted because it represents a source-data issue that should be documented and investigated rather than hidden.
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -2109,51 +2047,24 @@ elif page == "Data & Methodology":
     )
 
     st.markdown(
-        """
-        <div class="info-box">
-
-        <strong>1. Raw data</strong><br>
-        2016 and 2021 eThekwini election datasets
-
-        <br><br>
-
-        <strong>2. Cleaning</strong><br>
-        Missing-value checks, duplicate checks, text standardisation,
-        numeric conversion and data-quality validation
-
-        <br><br>
-
-        <strong>3. Geographic alignment</strong><br>
-        110 common wards were selected for comparable modelling
-
-        <br><br>
-
-        <strong>4. Feature engineering</strong><br>
-        Historical votes, vote share and ward-level historical totals
-
-        <br><br>
-
-        <strong>5. Machine learning</strong><br>
-        Random Forest Regression
-
-        <br><br>
-
-        <strong>6. Evaluation</strong><br>
-        80/20 train-test split using MAE, RMSE and R²
-
-        <br><br>
-
-        <strong>7. Forecast</strong><br>
-        Model-generated 2026 vote-share projections
-
-        <br><br>
-
-        <strong>8. Participation estimate</strong><br>
-        Historical PR participation used to derive a 2026 participation
-        scenario and estimated number of participating voters
-
-        </div>
-        """,
+        """<div class="info-box">
+<strong>1. Raw data</strong><br>
+2016 and 2021 eThekwini election datasets<br><br>
+<strong>2. Cleaning</strong><br>
+Missing-value checks, duplicate checks, text standardisation, numeric conversion and data-quality validation<br><br>
+<strong>3. Geographic alignment</strong><br>
+110 common wards were selected for comparable modelling<br><br>
+<strong>4. Feature engineering</strong><br>
+Historical votes, vote share and ward-level historical totals<br><br>
+<strong>5. Machine learning</strong><br>
+Random Forest Regression<br><br>
+<strong>6. Evaluation</strong><br>
+80/20 train-test split using MAE, RMSE and R²<br><br>
+<strong>7. Forecast</strong><br>
+Model-generated 2026 vote-share projections<br><br>
+<strong>8. Participation estimate</strong><br>
+Historical PR participation used to derive a 2026 participation scenario and estimated number of participating voters
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -2165,35 +2076,17 @@ elif page == "Data & Methodology":
     )
 
     st.markdown(
-        """
-        <div class="warning-box">
-
-        • The 2026 figures are model-generated projections, not actual
-        election results.
-
-        <br><br>
-
-        • The model is based on only two historical election periods,
-        so long-term political and demographic changes are not fully
-        represented.
-
-        <br><br>
-
-        • The participation figure is specifically a PR-ballot
-        participation proxy.
-
-        <br><br>
-
-        • Geographic boundaries and voting districts can change between
-        elections, which is why common wards were used.
-
-        <br><br>
-
-        • Statistical model performance should not be interpreted as a
-        guarantee that future real-world results will match the model.
-
-        </div>
-        """,
+        """<div class="warning-box">
+• The 2026 figures are model-generated projections, not actual election results.
+<br><br>
+• The model is based on only two historical election periods, so long-term political and demographic changes are not fully represented.
+<br><br>
+• The participation figure is specifically a PR-ballot participation proxy.
+<br><br>
+• Geographic boundaries and voting districts can change between elections, which is why common wards were used.
+<br><br>
+• Statistical model performance should not be interpreted as a guarantee that future real-world results will match the model.
+</div>""",
         unsafe_allow_html=True
     )
 
@@ -2203,20 +2096,11 @@ elif page == "Data & Methodology":
 # ============================================================
 
 st.markdown(
-    """
-    <div class="footer">
-
-        eThekwini Election Intelligence Dashboard<br>
-
-        Historical analysis • Machine learning • Forecasting •
-        Interactive analytics
-
-        <br><br>
-
-        Academic project — projections are model-generated estimates
-        and should not be interpreted as actual election results.
-
-    </div>
-    """,
+    """<div class="footer">
+eThekwini Election Intelligence Dashboard<br>
+Historical analysis • Machine learning • Forecasting • Interactive analytics
+<br><br>
+Academic project — projections are model-generated estimates and should not be interpreted as actual election results.
+</div>""",
     unsafe_allow_html=True
 )
